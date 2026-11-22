@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Study Decibel Meter</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&display=swap">
+<style>
+:root{color-scheme:dark;--bg:#060908;--card:#0e1312;--line:#1d2524;--mute:#5f6a67;--sub:#8a9692;--txt:#eef2f0;--blue:#40a9f7;--mint:#5cf09b;--red:#ee5d52;--zc:#8a9692;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px);background:var(--bg)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;min-height:100dvh;background:var(--bg);color:var(--txt);font-family:'Outfit',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+button,input,summary{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--txt);outline-offset:3px}
+.app{width:min(100%,480px);margin:0 auto;container-type:inline-size;position:relative;overflow:hidden;padding-bottom:8cqw}
+.gauge{position:relative;aspect-ratio:720/1215;margin-top:calc(-1 * env(safe-area-inset-top,0px))}
+.ring{will-change:transform;position:absolute;left:1.528cqw;top:-11.528cqw;width:177.78cqw;aspect-ratio:1;border-radius:50%;
+  background:conic-gradient(from 0deg,#b9c24b 0deg,#8fc855 28deg,#58c28f 90deg,#4fb9b5 180deg,#5ccb85 200deg,#66d066 225deg,#85cc5a 247deg,#b4c64c 262deg,#dbb944 277deg,#e39a3f 292deg,#e8743f 306deg,#e8603a 320deg,#e6803c 335deg,#d8aa45 350deg,#b9c24b 360deg);
+  -webkit-mask:radial-gradient(circle closest-side,transparent 71.8%,#000 72.2%,#000 99.5%,transparent 100%);
+          mask:radial-gradient(circle closest-side,transparent 71.8%,#000 72.2%,#000 99.5%,transparent 100%)}
+.gauge svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+svg text{font-family:'Outfit',system-ui,sans-serif}
+.row{display:flex;gap:3cqw;margin:5cqw 5cqw 0}
+.btn{flex:1;height:13cqw;border:0;border-radius:999px;cursor:pointer;background:linear-gradient(90deg,#4fb9b5,#62d066);color:#04100a;font-weight:600;font-size:clamp(15px,4.4cqw,22px)}
+.btn.ghost{flex:.5;background:transparent;border:1px solid var(--line);color:var(--txt);font-weight:500}
+.err{margin:3cqw 5cqw 0;color:#f4a39c;font-size:clamp(12px,3.4cqw,16px);line-height:1.4;text-align:center}
+.err:empty{display:none}
+.sec{margin:4.5cqw 5cqw 0}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:4.2cqw;padding:4.2cqw}
+.zone{display:flex;gap:3.2cqw;align-items:center;padding:4cqw 4.4cqw;border-radius:4.2cqw;background:color-mix(in srgb,var(--zc) 11%,var(--card));border:1px solid color-mix(in srgb,var(--zc) 40%,var(--line));transition:background .3s,border-color .3s}
+.zone i{flex:none;width:10px;height:10px;border-radius:50%;background:var(--zc);box-shadow:0 0 12px var(--zc)}
+.zone b{display:block;font-size:clamp(17px,5cqw,24px);font-weight:600;color:var(--zc);line-height:1.2}
+.zone span{display:block;color:var(--sub);font-size:clamp(12px,3.4cqw,16px);margin-top:.25em;line-height:1.35}
+.ph{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3cqw}
+.ph h2{margin:0;font-size:clamp(15px,4.2cqw,20px);font-weight:500}
+.ph span{color:var(--sub);font-size:clamp(12px,3.3cqw,15px)}
+.live.on{color:var(--mint)}
+canvas{display:block;width:100%;height:clamp(170px,46cqw,230px)}
+.sc{display:grid;grid-template-columns:repeat(4,1fr);gap:2cqw;margin-bottom:3.5cqw}
+.sc div{text-align:center;padding:2.8cqw 0;border-radius:3cqw;background:rgba(255,255,255,.035)}
+.sc small{display:block;color:var(--sub);font-size:clamp(10px,2.9cqw,13px);margin-bottom:.3em}
+.sc b{font-size:clamp(17px,5.2cqw,25px);font-weight:600;font-variant-numeric:tabular-nums}
+.zl{list-style:none;margin:0;padding:0;display:grid;gap:1.2cqw}
+.zl li{display:grid;grid-template-columns:auto 1fr auto;gap:1.6cqw 2.6cqw;align-items:center;padding:2.6cqw;border-radius:3cqw;border:1px solid transparent;opacity:.7;transition:opacity .25s}
+.zl li.on{opacity:1;background:rgba(255,255,255,.045);border-color:color-mix(in srgb,var(--c) 45%,transparent)}
+.zl i{width:10px;height:10px;border-radius:50%;background:var(--c)}
+.zn b{display:block;font-weight:500;font-size:clamp(13px,3.8cqw,17px)}
+.zn small{color:var(--sub);font-size:clamp(11px,3cqw,14px)}
+.zt{font-variant-numeric:tabular-nums;font-size:clamp(13px,3.8cqw,17px);color:var(--sub)}
+.zl li.on .zt{color:var(--txt)}
+.bar{grid-column:1/-1;height:4px;border-radius:2px;background:rgba(255,255,255,.06);overflow:hidden}
+.bar u{display:block;height:100%;width:0;background:var(--c);transition:width .3s}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main class="app">
+  <div class="gauge">
+    <div class="ring" id="ring"></div>
+    <svg viewBox="0 0 720 1215" role="img" aria-label="Noise level gauge">
+      <defs>
+        <radialGradient id="halo" gradientUnits="userSpaceOnUse" cx="651" cy="557" r="461">
+          <stop offset=".7" stop-color="#fff" stop-opacity=".34"/><stop offset=".82" stop-color="#fff" stop-opacity=".1"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <circle cx="651" cy="557" r="461" fill="#030505"/>
+      <circle cx="651" cy="557" r="461" fill="url(#halo)"/>
+      <g id="ticks" stroke="#fff" stroke-linecap="round" opacity=".93"></g>
+      <g id="needle" transform="translate(651 557) rotate(270)"><path d="M0-511C-5-450-24-385-42-312L42-312C24-385 5-450 0-511Z" fill="#fff"/></g>
+      <circle cx="651" cy="557" r="328" fill="#fff"/>
+      <rect x="447" y="395" width="12" height="40" rx="5" fill="#5f6a67"/>
+      <text id="cat" x="472" y="433" font-size="42" fill="#5f6a67">Busy road</text>
+      <text id="num" x="441" y="667" font-size="257" font-weight="500" fill="#ea665b">76</text>
+      <text id="d1" x="447" y="733" font-size="40" fill="#5f6a67">Noisy</text>
+      <text id="d2" x="447" y="778" font-size="40" fill="#5f6a67">environment</text>
+    </svg>
+  </div>
+
+
+  <div class="row" style="margin-top:2cqw"><button class="btn" id="toggle" type="button">Start measuring</button><button class="btn ghost" id="reset" type="button">Reset</button></div>
+  <p class="err" id="err" role="alert"></p>
+
+  <section class="sec zone" id="zone" aria-live="polite">
+    <i></i><div><b id="zname">Ready to study?</b><span id="ztip">Tap Start and allow microphone access.</span></div>
+  </section>
+
+  <section class="sec panel" aria-label="Live sound graph">
+    <div class="ph"><h2>Live sound level</h2><span id="unitlbl">dB(A) · Slow</span></div>
+    <canvas id="cv"></canvas>
+  </section>
+
+  <section class="sec panel" aria-label="Study session">
+    <div class="ph"><h2>Study session</h2><span class="live" id="live">Not listening</span></div>
+    <div class="sc">
+      <div><small>Session</small><b id="sess">0:00</b></div>
+      <div><small>Focus time</small><b id="focus">0:00</b></div>
+      <div><small>Focus score</small><b id="score">--</b></div>
+      <div><small>Loud hits</small><b id="hits">0</b></div>
+    </div>
+    <ul class="zl" id="zl"></ul>
+  </section>
+
+
+</main>
+
+<script>
+(()=>{
+const BASE=100,OFF=20.6,KEEP=600,MIN=20,MAXDB=100,CX=651,CY=557,PTR=270,TAU=1;
+// Study zones: edit the ranges, names and tips here.
+const ZONES=[
+ {max:35,name:"Deep Focus",range:"Under 35 dB",tip:"Silent enough for exams and heavy reading.",c:"#52b9b5"},
+ {max:50,name:"Perfect Study Session",range:"35–50 dB",tip:"Calm and steady. This is the sweet spot for concentrating.",c:"#62d066"},
+ {max:60,name:"Light Study Only",range:"50–60 dB",tip:"Fine for notes and review, but hard topics will suffer.",c:"#dbb944"},
+ {max:70,name:"Getting Noisy",range:"60–70 dB",tip:"Focus starts to slip. Try a quieter spot.",c:"#e8803c"},
+ {max:Infinity,name:"Don’t Study",range:"70+ dB",tip:"Too loud to concentrate. Move somewhere quieter.",c:"#ea665b"}];
+const LEVELS=[[35,"Whisper","Very quiet"],[45,"Library","Quiet environment"],[55,"Light rain","Calm environment"],[65,"Conversation","Moderate noise"],[72,"Restaurant","Lively environment"],[82,"Busy road","Noisy environment"],[92,"Lawn mower","Very noisy"],[102,"Power tools","Hearing risk"],[999,"Concert","Dangerously loud"]];
+const $=id=>document.getElementById(id),NS="http://www.w3.org/2000/svg";
+const cv=$("cv"),g=cv.getContext("2d");
+let ctx=null,stream=null,an=null,buf=null,run=false,demo=true;
+let P=null,hist=[],last=0,startT=0,lastS=0,shownAt=0,disp=null,zi=null,zt=[0,0,0,0,0],hits=0,lvl=null;
+const raw=pw=>10*Math.log10(Math.max(pw,1e-14))+BASE;
+const clamp=(x,a,b)=>Math.min(b,Math.max(a,x));
+const fmt=s=>{s=Math.floor(s);return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")};
+const ang=db=>180+(clamp(db,MIN,MAXDB)-MIN)*2.4;
+const err=m=>{$("err").textContent=m};
+
+// One tick per dB around the whole dial, a long tick every 5 dB
+for(let d=-55;d<95;d++){
+  const a=(180+(d-20)*2.4)*Math.PI/180,long=((d%5)+5)%5===0,r2=624-(long?72:34),l=document.createElementNS(NS,"line");
+  l.setAttribute("x1",CX+624*Math.sin(a));l.setAttribute("y1",CY-624*Math.cos(a));
+  l.setAttribute("x2",CX+r2*Math.sin(a));l.setAttribute("y2",CY-r2*Math.cos(a));
+  l.setAttribute("stroke-width",long?9:5);$("ticks").appendChild(l);
+}
+ZONES.forEach(z=>{const li=document.createElement("li");li.style.setProperty("--c",z.c);
+  li.innerHTML='<i></i><div class="zn"><b>'+z.name+'</b><small>'+z.range+'</small></div><span class="zt">0:00</span><div class="bar"><u></u></div>';$("zl").appendChild(li)});
+
+// The pointer stays fixed; the whole dial (colour ring + ticks) rotates under it
+function view(v,db,col){
+  const R=(PTR-ang(db)).toFixed(2);
+  $("ring").style.transform="rotate("+R+"deg)";
+  $("ticks").setAttribute("transform","rotate("+R+" "+CX+" "+CY+")");
+  $("num").textContent=v;$("num").setAttribute("fill",col);
+  const L=LEVELS.find(x=>v<x[0])||LEVELS[LEVELS.length-1];
+  if(L!==lvl){lvl=L;$("cat").textContent=L[1];const k=L[2].indexOf(" ");$("d1").textContent=L[2].slice(0,k);$("d2").textContent=L[2].slice(k+1)}
+}
+function idleView(t){view("--",MIN,"#5f6a67");lvl=null;$("cat").textContent=t;$("d1").textContent="";$("d2").textContent=""}
+function setIdle(a,b){zi=null;$("zone").style.setProperty("--zc","#8a9692");$("zname").textContent=a;$("ztip").textContent=b;[...$("zl").children].forEach(li=>li.classList.remove("on"))}
+function setZone(i){zi=i;const z=ZONES[i];$("zone").style.setProperty("--zc",z.c);$("zname").textContent=z.name;$("ztip").textContent=z.tip;[...$("zl").children].forEach((li,k)=>li.classList.toggle("on",k===i))}
+function pickZone(v){
+  let i=ZONES.findIndex(z=>v<z.max);
+  if(zi!==null&&Math.abs(i-zi)===1){const e=i>zi?ZONES[zi].max:ZONES[i].max;if(Math.abs(v-e)<1.5)return zi}
+  return i;
+}
+function paintStudy(){
+  const tot=zt.reduce((a,b)=>a+b,0),foc=zt[0]+zt[1];
+  $("sess").textContent=fmt(tot);$("focus").textContent=fmt(foc);
+  $("score").textContent=tot>1?Math.round(foc/tot*100)+"%":"--";$("hits").textContent=hits;
+  [...$("zl").children].forEach((li,k)=>{li.querySelector(".zt").textContent=fmt(zt[k]);li.querySelector("u").style.width=(tot>0?zt[k]/tot*100:0)+"%"});
+}
+function clearData(){
+  P=null;hist=[];disp=null;demo=false;zt=[0,0,0,0,0];hits=0;
+  if(run){idleView("Listening");setIdle("Getting a reading…","Hold on, the meter is warming up.")}
+  else{idleView("Ready");setIdle("Ready to study?","Tap Start and allow microphone access.")}
+  paintStudy();
+}
+
+// Audio: A-weighting filter chain, calibrated against BASE + OFF
+async function start(){
+  err("");
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){err("This browser can’t access a microphone. Try Chrome, Edge, Safari or Firefox.");return}
+  try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}})}
+  catch(e){
+    err(e.name==="NotFoundError"?"No microphone was found. Plug one in or check your device’s sound settings."
+      :window.self!==window.top?"This preview doesn’t allow microphone access. Open the page in its own browser tab."
+      :"Microphone access is blocked. Click the lock icon in the address bar, set Microphone to Allow, then reload the page.");
+    return}
+  ctx=new (window.AudioContext||window.webkitAudioContext)();
+  if(ctx.state==="suspended")await ctx.resume();
+  an=ctx.createAnalyser();an.fftSize=1024;an.smoothingTimeConstant=0;
+  const mute=ctx.createGain();mute.gain.value=0;an.connect(mute);mute.connect(ctx.destination);
+  const bq=(type,f,q)=>{const n=ctx.createBiquadFilter();n.type=type;n.frequency.value=f;n.Q.value=20*Math.log10(q);return n};
+  const gA=ctx.createGain();gA.gain.value=1.2589;
+  let p=ctx.createMediaStreamSource(stream);
+  [bq("highpass",20.6,.5),bq("highpass",281.9,.3334),bq("lowpass",12194,.5),gA].forEach(n=>{p.connect(n);p=n});
+  p.connect(an);buf=new Float32Array(an.fftSize);
+  if(demo){demo=false;idleView("Listening");setIdle("Getting a reading…","Hold on, the meter is warming up.")}
+  run=true;last=startT=performance.now();
+  $("toggle").textContent="Pause";$("live").classList.add("on");$("live").textContent="Listening";
+}
+function pause(){
+  run=false;if(stream)stream.getTracks().forEach(t=>t.stop());if(ctx)ctx.close();
+  stream=null;ctx=null;$("toggle").textContent="Resume";$("live").classList.remove("on");$("live").textContent="Paused";
+}
+$("toggle").onclick=()=>run?pause():start();
+$("reset").onclick=()=>{err("");clearData()};
+
+// Live graph
+function drawGraph(){
+  const dpr=window.devicePixelRatio||1,W=cv.clientWidth,H=cv.clientHeight;
+  if(cv.width!==Math.round(W*dpr)||cv.height!==Math.round(H*dpr)){cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr)}
+  g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,W,H);
+  const L=30,R=6,T0=8,B=22,pw=W-L-R,ph=H-T0-B;
+  const y=v=>T0+ph*(1-(clamp(v,MIN,MAXDB)-MIN)/(MAXDB-MIN));
+  const Bd=[MAXDB,70,60,50,35,MIN];
+  for(let k=0;k<5;k++){g.fillStyle=ZONES[4-k].c;g.globalAlpha=.06;g.fillRect(L,y(Bd[k]),pw,y(Bd[k+1])-y(Bd[k]))}
+  g.globalAlpha=1;g.font="11px Outfit,system-ui,sans-serif";g.textBaseline="middle";g.textAlign="right";
+  [35,50,60,70].forEach(v=>{g.strokeStyle="rgba(255,255,255,.08)";g.lineWidth=1;g.setLineDash([3,4]);g.beginPath();g.moveTo(L,y(v));g.lineTo(W-R,y(v));g.stroke();g.setLineDash([]);g.fillStyle="rgba(238,242,240,.5)";g.fillText(v,L-7,y(v))});
+  g.textBaseline="alphabetic";g.fillStyle="rgba(238,242,240,.4)";
+  g.textAlign="left";g.fillText("60s ago",L,H-5);g.textAlign="center";g.fillText("30s",L+pw/2,H-5);g.textAlign="right";g.fillText("now",W-R,H-5);
+  const n=hist.length;
+  if(n<2){g.textAlign="center";g.textBaseline="middle";g.fillStyle="rgba(238,242,240,.5)";g.font="14px Outfit,system-ui,sans-serif";g.fillText(run?"Listening…":"Press Start to see your sound levels live",L+pw/2,T0+ph/2);return}
+  const step=pw/(KEEP-1),X=i=>L+pw-(n-1-i)*step,Y=i=>y(hist[i]+OFF);
+  const gr=g.createLinearGradient(0,T0,0,T0+ph);
+  for(let k=0;k<5;k++){const c=ZONES[4-k].c;gr.addColorStop(clamp((MAXDB-Bd[k])/80+(k?.012:0),0,1),c);gr.addColorStop(clamp((MAXDB-Bd[k+1])/80-(k<4?.012:0),0,1),c)}
+  const path=()=>{g.beginPath();g.moveTo(X(0),Y(0));for(let i=1;i<n;i++)g.quadraticCurveTo(X(i-1),Y(i-1),(X(i-1)+X(i))/2,(Y(i-1)+Y(i))/2);g.lineTo(X(n-1),Y(n-1))};
+  path();g.lineTo(X(n-1),T0+ph);g.lineTo(X(0),T0+ph);g.closePath();
+  g.globalAlpha=.15;g.fillStyle=gr;g.fill();g.globalAlpha=1;
+  path();g.lineWidth=2.4;g.lineJoin="round";g.lineCap="round";g.strokeStyle=gr;
+  g.shadowBlur=10;g.shadowColor=zi!==null?ZONES[zi].c:"#8a9692";g.stroke();g.shadowBlur=0;
+  const ex=X(n-1),ey=Y(n-1),c=zi!==null?ZONES[zi].c:"#fff";
+  g.beginPath();g.arc(ex,ey,7,0,Math.PI*2);g.fillStyle=c;g.globalAlpha=.25;g.fill();g.globalAlpha=1;
+  g.beginPath();g.arc(ex,ey,3.6,0,Math.PI*2);g.fillStyle="#fff";g.fill();
+}
+
+function frame(t){
+  let dt=0,counted=false;
+  if(run){
+    dt=Math.min(.1,Math.max(0,(t-last)/1000));last=t;
+    an.getFloatTimeDomainData(buf);
+    let s=0;for(let i=0;i<buf.length;i++)s+=buf[i]*buf[i];
+    const p=s/buf.length;
+    if(t-startT>600){
+      P=P===null?p:P+(p-P)*(1-Math.exp(-dt/TAU));
+      counted=true;
+      if(t-lastS>=100){lastS=t;hist.push(raw(P));if(hist.length>KEEP)hist.shift()}
+    }
+  }
+  if(P!==null){
+    disp=raw(P)+OFF;
+    const i=pickZone(disp);
+    if(i!==zi){if(i===4&&zi!==null&&zi<4&&run)hits++;setZone(i)}
+    if(counted)zt[i]+=dt;
+    view(Math.round(disp),disp,ZONES[i].c);
+    if(t-shownAt>120){shownAt=t;paintStudy()}
+  }
+  drawGraph();
+  requestAnimationFrame(frame);
+}
+view(76,76,"#ea665b");paintStudy();
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
